@@ -12,7 +12,6 @@ exports.handleRequest = function (req, res) {
     if(req.url === '/') {
       fs.readFile(__dirname + '/public/index.html', 'utf8', function(err, html) {
         if (err) {
-          console.log(html);
           throw err;
         } else {
           res.writeHeader(200, {"Content-Type": 'text/html'});
@@ -20,48 +19,57 @@ exports.handleRequest = function (req, res) {
           res.end();
         }
       });
-    } else { // '/www.google.com'
-    //if (req.method === '/'archive.archivedSites) {
-      // localhost3000/www.google.com
-      // var site = req.url.split('/').slice(-1);
-      // //initialize()
-      // fs.re
-      // get url path request
+    } else { 
+
       var pathname = url.parse(req.url).pathname.slice(1); //everything after the slash
 
-      // check if in archive
-        // send down the file in response
-      // else not in archive
-        // send robots txt about not having file      
+      fs.readFile(archive.paths.archivedSites + '/' + pathname, 'utf8', function(err, html) {
+        if (err) {
+          res.writeHeader(404);
+          res.end();
+        } else {
+          res.writeHeader(200, {"Content-Type": 'text/html'});
+          res.write(html);
+          res.end();
+        }
+      });
           
-        
-
     }
 
   } else if (req.method === 'POST') {
-      var tempurl = '';
-      request.on('data', function(data){
-        tempurl += data.toString();
+      // console.log('POST');
+      var tempura = '';
+      req.on('data', function(data){
+        tempura += data.toString();
+        console.log(data.toString());
+        console.log(tempura);
       });
+      
+      // remove 'url=' from beginning of tempura
 
       req.on('end', function(){
-        archive.isUrlArchived(pathname, function(isIn) {
-        if (isIn) {
-          // serve it up by reading file and sending it in response
-          fs.readFile(pathname, 'utf8', function(err, html){
-            if (err) {
-              console.log('errored on isUrlArchived');
-              throw err;
-            } else {
-              res.writeHeader(200, {"Content-Type": 'text/html'});
-              res.write(html);
-              res.end();
-            }
+        
+        tempura = tempura.slice(4); 
+        console.log(tempura);
+        // console.log(tempura);
+
+        // firsst check if in archive
+        archive.isUrlArchived(tempura, function(isIn) {
+          console.log(isIn);
+
+          if (isIn) {
+            // reroute to html page
+          } else if (!isIn) {
+            console.log('got to is url archived');
+            res.writeHeader(302);
+            res.end();
+            // check if in list
+            archive.isUrlInList(tempura, function(isIn){
+              if (!isIn) {
+                archive.addUrlToList(tempura, function(){});
+              } // if its alread there don't do anything
             });
-          } else {
-            // add to list of sites for helper to get
-            archive.addUrlToList(pathname, function(){});
-            // res.write that robot is worrking on it
+
           }
         });
       });
