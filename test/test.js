@@ -28,7 +28,7 @@ describe("server", function() {
   describe("archived websites", function () {
     describe("GET", function () {
       it("should return the content of a website from the archive", function (done) {
-        var fixtureName = "www.google.com";
+        var fixtureName = "www.google.com"; //pathname in req handler
         var fixturePath = archive.paths.archivedSites + "/" + fixtureName;
 
         // Create or clear the file.
