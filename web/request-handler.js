@@ -2,6 +2,7 @@ var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var fs = require('fs');
 var initialize = require('./initialize');
+var httpHelpers = require('./http-helpers');
 var url = require('url');
 // require more modules/folders here!
 
@@ -54,20 +55,29 @@ exports.handleRequest = function (req, res) {
         // console.log(tempura);
 
         // firsst check if in archive
-        archive.isUrlArchived(tempura, function(isIn) {
-          console.log(isIn);
+        archive.isUrlArchived(tempura, function(isArchived) {
+          console.log('url is archived: ', isArchived);
 
-          if (isIn) {
+          if (isArchived) {
             // reroute to html page
-          } else if (!isIn) {
-            console.log('got to is url archived');
-            res.writeHeader(302);
+            res.writeHead(200, httpHelpers.headers);
             res.end();
+          } else if (!isArchived) {
+            console.log('got to is url archived');
             // check if in list
-            archive.isUrlInList(tempura, function(isIn){
-              if (!isIn) {
-                archive.addUrlToList(tempura, function(){});
-              } // if its alread there don't do anything
+            archive.isUrlInList(tempura, function(isInList){
+              if (!isInList) {
+                archive.addUrlToList(tempura + '\n', function(){
+                  res.writeHead(302, httpHelpers.headers);
+                  res.end();
+                });
+                //************************** DELETE
+                // archive.downloadUrls(); // move all names in sites.txt to sites folder
+                //***************************
+              } else { // if its alread there don't do anything
+                res.writeHead(302, httpHelpers.headers);
+                res.end();
+              }
             });
 
           }

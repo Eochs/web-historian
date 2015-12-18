@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
-
+var request = require('request');
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
@@ -13,6 +13,7 @@ exports.paths = {
   siteAssets: path.join(__dirname, '../web/public'),
   archivedSites: path.join(__dirname, '../archives/sites'),
   list: path.join(__dirname, '../archives/sites.txt')
+  // list: path.join(__dirname, '../test/testdata/sites.txt')
 };
 
 // Used for stubbing paths for tests, do not modify
@@ -59,5 +60,29 @@ exports.isUrlArchived = function(url, callback) {
   });
 };
 
-exports.downloadUrls = function() {
+exports.downloadUrls = function(urls) {
+  // for each url call html fetcher on it
+  urls.forEach(function(url){
+    request('http://'+url, function (error, response, body) {
+        // console.log('body: ', body.slice(0, 10));
+        console.log('error: ', error);
+        // console.log('response-status: ', response.status);
+
+        var fixtureName = url; //pathname in req handler
+        var fixturePath = exports.paths.archivedSites + "/" + fixtureName;
+        // Create or clear the file.
+        var fd = fs.openSync(fixturePath, "w");
+        fs.writeSync(fd, body);
+        // console.log('body: ', body);
+        fs.closeSync(fd);
+
+        // Write data to the file.
+        fs.writeFileSync(fixturePath, url);
+    });
+  });
+
+  // Reset the sites.txt file to empty
+  fs.writeFile(exports.paths.list, '');
+
+// 
 };

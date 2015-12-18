@@ -62,9 +62,11 @@ describe("server", function() {
         request
           .post("/")
           .type('form')
+          // 'url=www.domain.com
           .send({ url: url })
           .expect(302, function (err) {
             if (!err) {
+              console.log('archive.paths.list ', archive.paths.list);
               var fileContents = fs.readFileSync(archive.paths.list, 'utf8');
               expect(fileContents).to.equal(url + "\n");
             }
@@ -149,9 +151,10 @@ describe("archive helpers", function(){
 
       // Ugly hack to wait for all downloads to finish.
       setTimeout(function () {
+        console.log('actual array of urls ', fs.readdirSync(archive.paths.archivedSites));
         expect(fs.readdirSync(archive.paths.archivedSites)).to.deep.equal(urlArray);
         done();
-      }, 25);
+      }, 1000);
     });
   });
 });

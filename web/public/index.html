@@ -8,5 +8,22 @@
   <form method="POST">
     <input type="input" name="url"></input>
   </form>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script>
+    $('form').on('submit', function(e){
+      e.preventDefault();
+      var data = $('input').val();
+      $.ajax({
+        type: "POST",
+        url: 'http://127.0.0.1:8080/',
+        data: data,
+        complete: function (d) {
+          console.log('successful POST');
+          $('input').val('');
+        },
+        dataType: 'json'
+      });
+    });
+  </script>
 </body>
 </html>
